@@ -1,6 +1,6 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,18 +18,15 @@ public class GameManager : MonoBehaviour
 	private static GameManager instance = null;
 	public static GameManager Instance { get { return instance; } }
 
-	/* 좀비 생성을 위한 변수 */
-	[SerializeField] private GameObject zombiePrefab;           // 좀비 프리팹
-	[SerializeField] private GameObject zombieSpawnPos;         // 좀비 소환 Position
+	[SerializeField] private GameObject zombiePrefab;		// 좀비 프리팹
+	[SerializeField] private GameObject zombieSpawnPos;     // 좀비 소환 Position
+	[SerializeField] private GameObject truck;
+															   
+	[SerializeField] private float zombieSpawnDelay;		// 좀비 소환 딜레이 시간
+	[SerializeField] private int zombieSpawnMax;			// 최대 좀비 수
 
-	[SerializeField] private float zombieSpawnDelay = 3.0f;     // 좀비 소환 딜레이 시간
-	[SerializeField] private int zombieSpawnMax = 10;           // 최대 좀비 수
+	private List<GameObject> zombies;						// 좀비 풀링 리스트
 
-	private List<GameObject> zombies;   // 좀비 풀
-	private int zombieSpawnCount = 0;   // 활성화 된 좀비 수 (....)
-	public void ZombieCount(int number) {  zombieSpawnCount += number; }
-
-	private bool isSpawning = true; 
 
 	private void Awake()
 	{
@@ -50,12 +47,8 @@ public class GameManager : MonoBehaviour
 		zombies = new List<GameObject>();
 		for (int i = 0; i < zombieSpawnMax; i++)
 		{
-			GameObject zombie = Instantiate(zombiePrefab, zombieSpawnPos.transform.position, Quaternion.identity, zombieSpawnPos.transform);
+			GameObject zombie = Instantiate(zombiePrefab);
 
-			Zombie zom = zombie.GetComponent<Zombie>();
-			zom.zombieLayerMask = (ZombieLayerMask)Random.Range(6, 9);
-
-			zombie.name += zom.zombieLayerMask.ToString();
 			zombies.Add(zombie);
 
 			zombie.SetActive(false);
@@ -66,22 +59,45 @@ public class GameManager : MonoBehaviour
 
 	private void Update()
 	{
-		isSpawning = zombieSpawnCount < zombieSpawnMax;
-		//if (zombieSpawnCount >= zombieSpawnMax)
-		//	isSpawning = false;
+		if (Input.GetKeyDown(KeyCode.C))
+		{
+			Time.timeScale += 0.5f;
+		}
+
+		if (Input.GetKeyDown(KeyCode.X))
+		{
+			Time.timeScale = 1f;
+		}
+
+		if (Input.GetKeyDown(KeyCode.Z))
+		{
+			if (Time.timeScale > 1)
+				Time.timeScale -= 0.5f;
+		}
 	}
 
 	/// <summary>
 	/// 미리 생성해 둔 좀비 하나씩 스폰
+	/// 스폰 될 때마다 랜덤으로 front, zero, back 레이어 적용
 	/// </summary>
 	private IEnumerator SpawnZombie()
 	{
-		while (isSpawning)
+		while (true)
 		{
-			zombies[zombieSpawnCount].SetActive(true);
-			zombieSpawnCount++;
+			foreach (GameObject zombie in zombies)
+			{
+				if (zombie.activeSelf == true) continue;
+
+				Zombie zom = zombie.GetComponent<Zombie>();
+				zom.zombieLayerMask = (ZombieLayerMask)Random.Range(6, 9);
+				zombie.transform.position = zombieSpawnPos.transform.position;
+
+				zombie.SetActive(true);
+				break;
+			}
 
 			yield return new WaitForSeconds(zombieSpawnDelay);
 		}
 	}
+
 }
