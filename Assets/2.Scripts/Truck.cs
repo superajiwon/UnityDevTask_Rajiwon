@@ -25,15 +25,6 @@ public class Truck : MonoBehaviour
 
 	private void Update()
 	{
-		float wheelspeed = (wspeed * -rigid.velocity.magnitude);
-		Debug.Log(wheelspeed);
-
-		backWheel.transform.Rotate(0, 0, wheelspeed);
-		frontWheel.transform.Rotate(0, 0, wheelspeed);
-	}
-
-	private void FixedUpdate()
-	{
 		rigid.velocity = new Vector2(speed, rigid.velocity.y);
 
 		float wheelspeed = (wspeed * -rigid.velocity.magnitude);
