@@ -227,10 +227,10 @@ MonoBehaviour:
   attackPower: 2
   zombieLayerMask: 0
   canvas: {fileID: 5728361111723173480}
-  moveSpeed: 1.2
-  climbPower: 5
+  moveSpeed: 1
+  climbPower: 5.5
   climbTime: 3
-  pullingTime: 0.5
+  pullingTime: 0.7
   raysize: 0.3
 --- !u!1 &873173986489781342
 GameObject:
